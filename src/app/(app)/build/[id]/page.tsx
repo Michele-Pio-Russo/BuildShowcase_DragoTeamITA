@@ -123,6 +123,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         {build.exilus && <Prop label="Exilus" value={build.exilus} />}
         {build.arcane && <Prop label="Arcane" value={build.arcane} />}
         {build.focus_school && <Prop label="Focus School" value={build.focus_school} />}
+        {build.archon_shards && <Prop label="Archon Shards" value={build.archon_shards} />}
       </div>
 
       {tags.length > 0 && (

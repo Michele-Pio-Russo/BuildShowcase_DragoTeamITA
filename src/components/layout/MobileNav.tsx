@@ -26,6 +26,7 @@ export default function MobileNav({ profile }: { profile: Profile }) {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-base-900 border-t border-base-700 flex items-center z-40">
       {item('/dashboard', '▣', 'Home')}
       {item('/build', '▤', 'Build')}
+      {item('/loadout', '⬡', 'Loadout')}
       {canEdit && item('/build/nuova', '+', 'Nuova')}
       {item('/preferiti', '★', 'Preferiti')}
     </nav>

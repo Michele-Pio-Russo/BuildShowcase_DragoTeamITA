@@ -45,7 +45,7 @@ export default function BuildExplorer({ fixedCategorySlug }: { fixedCategorySlug
 
       let query = supabase
         .from('builds')
-        .select('*, category:categories(*), author:profiles(*)')
+        .select('*, category:categories(*), author:profiles(*), build_tags(tag:tags(*))')
         .eq('status', 'pubblicata');
 
       if (categoryFilter) {
@@ -72,7 +72,10 @@ export default function BuildExplorer({ fixedCategorySlug }: { fixedCategorySlug
       }
 
       const { data } = await query.limit(60);
-      let result = (data as Build[]) ?? [];
+      let result = ((data as any[]) ?? []).map((b) => ({
+        ...b,
+        tags: (b.build_tags ?? []).map((bt: any) => bt.tag).filter(Boolean),
+      })) as Build[];
 
       if (authorFilter.trim()) {
         result = result.filter((b) =>
@@ -95,7 +98,7 @@ export default function BuildExplorer({ fixedCategorySlug }: { fixedCategorySlug
 
   const filteredByTag = useMemo(() => {
     if (!tagFilter) return builds;
-    return builds; // il filtro tag reale richiede join lato server; qui mostriamo tutti finché non arricchito
+    return builds.filter((b) => b.tags?.some((t) => t.nome === tagFilter));
   }, [builds, tagFilter]);
 
   return (
@@ -127,6 +130,18 @@ export default function BuildExplorer({ fixedCategorySlug }: { fixedCategorySlug
           value={authorFilter}
           onChange={(e) => setAuthorFilter(e.target.value)}
         />
+        <select
+          className="input-base md:max-w-[160px]"
+          value={tagFilter}
+          onChange={(e) => setTagFilter(e.target.value)}
+        >
+          <option value="">Tutti i tag</option>
+          {tags.map((t) => (
+            <option key={t.id} value={t.nome}>
+              {t.nome}
+            </option>
+          ))}
+        </select>
         <select
           className="input-base md:max-w-[180px]"
           value={sort}

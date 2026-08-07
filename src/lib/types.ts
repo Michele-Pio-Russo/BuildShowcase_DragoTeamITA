@@ -63,6 +63,7 @@ export interface Build {
   exilus: string | null;
   arcane: string | null;
   focus_school: string | null;
+  archon_shards: string | null;
   mods_image_url: string | null;
   stats: BuildStats;
   views_count: number;
@@ -94,6 +95,48 @@ export interface BuildHistoryEntry {
   changed_at: string;
   diff_summary: string | null;
   editor?: Profile;
+}
+
+export type WeaponSlot = 'primaria' | 'secondaria' | 'melee';
+
+export interface LoadoutWeapon {
+  id: string;
+  loadout_id: string;
+  slot: WeaponSlot;
+  build_id: string | null;
+  item_name: string | null;
+  ordine: number;
+  build?: Build;
+}
+
+export interface Loadout {
+  id: string;
+  title: string;
+  author_id: string;
+  status: BuildStatus;
+  image_url: string | null;
+  notes_md: string;
+  warframe_build_id: string | null;
+  warframe_item_name: string | null;
+  warframe_forma: string | null;
+  warframe_polarity: string | null;
+  warframe_aura: string | null;
+  warframe_exilus: string | null;
+  warframe_arcane: string | null;
+  warframe_archon_shards: string | null;
+  warframe_focus_school: string | null;
+  companion_build_id: string | null;
+  companion_item_name: string | null;
+  companion_weapon_build_id: string | null;
+  companion_weapon_item_name: string | null;
+  created_at: string;
+  updated_at: string;
+  // relazioni opzionali popolate in query
+  author?: Profile;
+  warframe_build?: Build;
+  companion_build?: Build;
+  companion_weapon_build?: Build;
+  weapons?: LoadoutWeapon[];
 }
 
 export const CATEGORY_LABELS: Record<string, string> = {

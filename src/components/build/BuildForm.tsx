@@ -58,6 +58,7 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
   const [exilus, setExilus] = useState(existingBuild?.exilus ?? '');
   const [arcane, setArcane] = useState(existingBuild?.arcane ?? '');
   const [focusSchool, setFocusSchool] = useState(existingBuild?.focus_school ?? '');
+  const [archonShards, setArchonShards] = useState(existingBuild?.archon_shards ?? '');
 
   // Step 3
   const [description, setDescription] = useState(existingBuild?.description_md ?? '');
@@ -212,6 +213,7 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
       exilus: exilus || null,
       arcane: arcane || null,
       focus_school: focusSchool || null,
+      archon_shards: archonShards || null,
       mods_image_url: finalModsImageUrl,
       stats,
     };
@@ -501,11 +503,22 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
               <input className="input-base" value={arcane} onChange={(e) => setArcane(e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-1">Focus School</label>
+              <label className="block text-sm text-slate-300 mb-1">Focus School consigliata</label>
               <input
                 className="input-base"
                 value={focusSchool}
                 onChange={(e) => setFocusSchool(e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm text-slate-300 mb-1">
+                Archon Shards consigliate <span className="text-slate-500">(Warframe)</span>
+              </label>
+              <input
+                className="input-base"
+                value={archonShards}
+                onChange={(e) => setArchonShards(e.target.value)}
+                placeholder="es. 5x Tauforged Amber (Health), o 3x Crimson + 2x Azure"
               />
             </div>
           </div>

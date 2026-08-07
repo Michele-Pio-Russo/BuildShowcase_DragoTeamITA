@@ -47,6 +47,9 @@ export default function Sidebar({ profile }: { profile: Profile }) {
         <Link href="/build" className={linkClass('/build')}>
           <span>▤</span> Tutte le build
         </Link>
+        <Link href="/loadout" className={linkClass('/loadout')}>
+          <span>⬡</span> Loadout completi
+        </Link>
 
         <div className="pt-4 pb-1 px-3 text-xs uppercase tracking-wide text-slate-500">
           Categorie
@@ -76,9 +79,15 @@ export default function Sidebar({ profile }: { profile: Profile }) {
       </nav>
 
       {canEdit && (
-        <div className="px-3 pb-3">
+        <div className="px-3 pb-3 space-y-1.5">
           <Link href="/build/nuova" className="btn-gold w-full flex items-center justify-center gap-1.5">
             <span>+</span> Nuova build
+          </Link>
+          <Link
+            href="/loadout/nuovo"
+            className="btn-secondary w-full flex items-center justify-center gap-1.5 !text-xs"
+          >
+            <span>+</span> Nuovo loadout
           </Link>
         </div>
       )}
