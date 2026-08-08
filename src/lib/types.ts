@@ -159,4 +159,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   arma_melee: 'Arma melee',
   companion: 'Companion',
   arma_companion: 'Arma del companion',
+  archgun: 'Archgun',
+  archmelee: 'Archmelee',
+  archwing: 'Archwing',
 };

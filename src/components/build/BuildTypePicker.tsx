@@ -7,6 +7,9 @@ const TYPE_OPTIONS: { slug: string; label: string; hint: string }[] = [
   { slug: 'arma_melee', label: 'Arma melee', hint: 'Exilus, Arcane, Stile' },
   { slug: 'companion', label: 'Companion', hint: 'Solo mod base' },
   { slug: 'arma_companion', label: 'Arma del companion', hint: 'Solo mod base' },
+  { slug: 'archgun', label: 'Archgun', hint: 'Solo mod base' },
+  { slug: 'archmelee', label: 'Archmelee', hint: 'Solo mod base' },
+  { slug: 'archwing', label: 'Archwing', hint: 'Solo mod base' },
 ];
 
 export default function BuildTypePicker({ onChoose }: { onChoose: (slug: string) => void }) {
