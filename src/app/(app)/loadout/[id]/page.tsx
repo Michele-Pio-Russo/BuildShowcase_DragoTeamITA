@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { preserveLineBreaks } from '@/lib/markdown';
 import FavoriteButton from '@/components/build/FavoriteButton';
 import CommentSection from '@/components/comments/CommentSection';
+import DeleteLoadoutButton from '@/components/loadout/DeleteLoadoutButton';
 
 const slotLabels: Record<WeaponSlot, string> = {
   primaria: 'Arma primaria',
@@ -40,6 +41,8 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
     .single<Profile>();
 
   const canEdit = profile?.role === 'editor' || profile?.role === 'admin';
+  const canDelete =
+    profile?.role === 'admin' || (profile?.role === 'editor' && loadout.author_id === user?.id);
 
   const { data: favorite } = user
     ? await supabase
@@ -94,6 +97,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
               Modifica
             </Link>
           )}
+          {canDelete && <DeleteLoadoutButton loadoutId={loadout.id} loadoutTitle={loadout.title} />}
         </div>
       </div>
 

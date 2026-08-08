@@ -321,9 +321,12 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
     <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-8">
       {!isEditing && (
         <div className="mb-4">
-          <Link href="/build" className="text-sm text-slate-400 hover:text-slate-200">
+          <button
+            onClick={() => setShowForm(false)}
+            className="text-sm text-slate-400 hover:text-slate-200"
+          >
             ← Torna alle build
-          </Link>
+          </button>
         </div>
       )}
 
