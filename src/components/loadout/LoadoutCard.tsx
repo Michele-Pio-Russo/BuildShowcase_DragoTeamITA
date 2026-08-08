@@ -36,6 +36,7 @@ export default function LoadoutCard({ loadout }: { loadout: Loadout }) {
         )}
         <div className="flex items-center justify-between mt-3 pt-2 border-t border-base-700 text-xs text-slate-500">
           <span className="truncate">{loadout.author?.username ?? '—'}</span>
+          <span className="shrink-0 ml-2">★ {loadout.saves_count ?? 0}</span>
         </div>
       </div>
     </Link>
