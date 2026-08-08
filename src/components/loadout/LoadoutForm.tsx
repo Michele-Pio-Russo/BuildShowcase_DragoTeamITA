@@ -54,24 +54,9 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
   const [imageUrl, setImageUrl] = useState(existingLoadout?.image_url ?? '');
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // Step 2 — Warframe
-  const [warframeMode, setWarframeMode] = useState<LinkMode>(
-    existingLoadout?.warframe_build_id ? 'build' : 'testo'
-  );
+  // Step 2 — Warframe (solo da build esistente: i dati mod arrivano dalla build collegata)
   const [warframeBuild, setWarframeBuild] = useState<Build | null>(
     existingLoadout?.warframe_build ?? null
-  );
-  const [warframeItemName, setWarframeItemName] = useState(existingLoadout?.warframe_item_name ?? '');
-  const [warframeForma, setWarframeForma] = useState(existingLoadout?.warframe_forma ?? '');
-  const [warframePolarity, setWarframePolarity] = useState(existingLoadout?.warframe_polarity ?? '');
-  const [warframeAura, setWarframeAura] = useState(existingLoadout?.warframe_aura ?? '');
-  const [warframeExilus, setWarframeExilus] = useState(existingLoadout?.warframe_exilus ?? '');
-  const [warframeArcane, setWarframeArcane] = useState(existingLoadout?.warframe_arcane ?? '');
-  const [warframeArchonShards, setWarframeArchonShards] = useState(
-    existingLoadout?.warframe_archon_shards ?? ''
-  );
-  const [warframeFocusSchool, setWarframeFocusSchool] = useState(
-    existingLoadout?.warframe_focus_school ?? ''
   );
 
   // Step 3 — Armi
@@ -164,6 +149,11 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
       setStep(1);
       return;
     }
+    if (!warframeBuild) {
+      setError('Seleziona una build Warframe esistente.');
+      setStep(2);
+      return;
+    }
     setSaving(true);
 
     const {
@@ -182,15 +172,15 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
       status,
       image_url: finalImageUrl,
       notes_md: notes,
-      warframe_build_id: warframeMode === 'build' ? warframeBuild?.id ?? null : null,
-      warframe_item_name: warframeMode === 'testo' ? warframeItemName || null : null,
-      warframe_forma: warframeForma || null,
-      warframe_polarity: warframePolarity || null,
-      warframe_aura: warframeAura || null,
-      warframe_exilus: warframeExilus || null,
-      warframe_arcane: warframeArcane || null,
-      warframe_archon_shards: warframeArchonShards || null,
-      warframe_focus_school: warframeFocusSchool || null,
+      warframe_build_id: warframeBuild.id,
+      warframe_item_name: null,
+      warframe_forma: null,
+      warframe_polarity: null,
+      warframe_aura: null,
+      warframe_exilus: null,
+      warframe_arcane: null,
+      warframe_archon_shards: null,
+      warframe_focus_school: null,
       companion_build_id: companionMode === 'build' ? companionBuild?.id ?? null : null,
       companion_item_name: companionMode === 'testo' ? companionItemName || null : null,
       companion_weapon_build_id:
@@ -312,94 +302,34 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
 
       {step === 2 && (
         <div className="card p-5 space-y-5">
-          <ModeToggle mode={warframeMode} onChange={setWarframeMode} />
-
-          {warframeMode === 'build' ? (
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Build Warframe esistente</label>
-              <BuildPicker
-                categorySlug="warframe"
-                value={warframeBuild}
-                onChange={setWarframeBuild}
-                placeholder="Cerca una build Warframe pubblicata…"
-              />
-            </div>
-          ) : (
-            <>
-              <div>
-                <label className="block text-sm text-slate-300 mb-1">Nome del Warframe</label>
-                <input
-                  className="input-base"
-                  value={warframeItemName}
-                  onChange={(e) => setWarframeItemName(e.target.value)}
-                  placeholder="es. Saryn Prime"
-                />
-              </div>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Forma</label>
-                  <input
-                    className="input-base"
-                    value={warframeForma}
-                    onChange={(e) => setWarframeForma(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Polarità</label>
-                  <input
-                    className="input-base"
-                    value={warframePolarity}
-                    onChange={(e) => setWarframePolarity(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Aura</label>
-                  <input
-                    className="input-base"
-                    value={warframeAura}
-                    onChange={(e) => setWarframeAura(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Exilus</label>
-                  <input
-                    className="input-base"
-                    value={warframeExilus}
-                    onChange={(e) => setWarframeExilus(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-300 mb-1">Arcane</label>
-                  <input
-                    className="input-base"
-                    value={warframeArcane}
-                    onChange={(e) => setWarframeArcane(e.target.value)}
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Focus School e Archon Shards si applicano al loadout indipendentemente dal collegamento */}
-          <div className="grid sm:grid-cols-2 gap-4 pt-2 border-t border-base-700">
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Focus School consigliata</label>
-              <input
-                className="input-base"
-                value={warframeFocusSchool}
-                onChange={(e) => setWarframeFocusSchool(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Archon Shards consigliate</label>
-              <input
-                className="input-base"
-                value={warframeArchonShards}
-                onChange={(e) => setWarframeArchonShards(e.target.value)}
-                placeholder="es. 5x Tauforged Amber (Health)"
-              />
-            </div>
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">Build Warframe *</label>
+            <p className="text-xs text-slate-500 mb-2">
+              Seleziona una build Warframe già pubblicata nell&apos;archivio — Forma, Aura, Exilus,
+              Arcane, Focus School e Archon Shards vengono presi automaticamente da quella build.
+            </p>
+            <BuildPicker
+              categorySlug="warframe"
+              value={warframeBuild}
+              onChange={setWarframeBuild}
+              placeholder="Cerca una build Warframe pubblicata…"
+            />
           </div>
+
+          {warframeBuild && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-3 border-t border-base-700 text-sm">
+              {warframeBuild.forma && <MiniProp label="Forma" value={warframeBuild.forma} />}
+              {warframeBuild.aura && <MiniProp label="Aura" value={warframeBuild.aura} />}
+              {warframeBuild.exilus && <MiniProp label="Exilus" value={warframeBuild.exilus} />}
+              {warframeBuild.arcane && <MiniProp label="Arcane" value={warframeBuild.arcane} />}
+              {warframeBuild.focus_school && (
+                <MiniProp label="Focus School" value={warframeBuild.focus_school} />
+              )}
+              {warframeBuild.archon_shards && (
+                <MiniProp label="Archon Shards" value={warframeBuild.archon_shards} />
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -532,9 +462,7 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
             <ul className="text-sm text-slate-300 space-y-1">
               <li>
                 <span className="text-slate-500">Warframe:</span>{' '}
-                {warframeMode === 'build'
-                  ? warframeBuild?.title ?? 'non selezionato'
-                  : warframeItemName || 'non specificato'}
+                {warframeBuild?.title ?? 'non selezionato'}
               </li>
               <li>
                 <span className="text-slate-500">Armi:</span>{' '}
@@ -582,6 +510,15 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function MiniProp({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="text-slate-200">{value}</p>
     </div>
   );
 }

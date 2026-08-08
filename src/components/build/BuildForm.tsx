@@ -10,7 +10,7 @@ import remarkGfm from 'remark-gfm';
 import { preserveLineBreaks } from '@/lib/markdown';
 import ArchonShardPicker from './ArchonShardPicker';
 import BuildTypePicker from './BuildTypePicker';
-import { getCategoryFieldFlags } from '@/lib/buildFields';
+import { getCategoryFieldFlags, getCategoryPlaceholders } from '@/lib/buildFields';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -41,7 +41,9 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
   const [modImages, setModImages] = useState<ModImageEntry[]>(
     existingBuild?.mods_image_url
       ? [{ key: 'legacy', file: null, url: existingBuild.mods_image_url, caption: '' }]
-      : []
+      : isEditing
+        ? []
+        : [{ key: crypto.randomUUID(), file: null, url: '', caption: '' }]
   );
   const [forma, setForma] = useState(existingBuild?.forma ?? '');
   const [stile, setStile] = useState(existingBuild?.stile ?? '');
@@ -116,6 +118,7 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
 
   const selectedCategory = categories.find((c) => c.id === categoryId);
   const fieldFlags = getCategoryFieldFlags(selectedCategory?.slug);
+  const placeholders = getCategoryPlaceholders(selectedCategory?.slug);
 
   function toggleTag(name: string) {
     setSelectedTags((prev) =>
@@ -349,7 +352,7 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
               className="input-base"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="es. Saryn Spore Spam Steel Path"
+              placeholder={placeholders.title}
             />
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -387,7 +390,7 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
                 className="input-base"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
-                placeholder="es. Saryn Prime"
+                placeholder={placeholders.itemName}
               />
             </div>
           </div>

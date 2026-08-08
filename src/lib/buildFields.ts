@@ -28,3 +28,28 @@ export function getCategoryFieldFlags(slug: string | undefined): CategoryFieldFl
     showStile: isMelee,
   };
 }
+
+export interface CategoryPlaceholders {
+  title: string;
+  itemName: string;
+}
+
+/** Placeholder di esempio realistici per ogni tipo, per guidare chi compila il form. */
+export function getCategoryPlaceholders(slug: string | undefined): CategoryPlaceholders {
+  switch (slug) {
+    case 'warframe':
+      return { title: 'es. Saryn Spore Spam Steel Path', itemName: 'es. Saryn Prime' };
+    case 'arma_primaria':
+      return { title: 'es. Braton Corrosivo Slash', itemName: 'es. Braton Prime' };
+    case 'arma_secondaria':
+      return { title: 'es. Lex Headshot Crit', itemName: 'es. Lex Prime' };
+    case 'arma_melee':
+      return { title: 'es. Nikana Combo Duration', itemName: 'es. Nikana Prime' };
+    case 'companion':
+      return { title: 'es. Panzer Tank Build', itemName: 'es. Panzer Vulpaphyla' };
+    case 'arma_companion':
+      return { title: 'es. Verglas Status Build', itemName: 'es. Verglas' };
+    default:
+      return { title: 'es. Titolo della build', itemName: 'es. Nome oggetto' };
+  }
+}

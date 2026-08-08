@@ -5,6 +5,8 @@ import type { Loadout, LoadoutWeapon, Profile, WeaponSlot } from '@/lib/types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { preserveLineBreaks } from '@/lib/markdown';
+import FavoriteButton from '@/components/build/FavoriteButton';
+import CommentSection from '@/components/comments/CommentSection';
 
 const slotLabels: Record<WeaponSlot, string> = {
   primaria: 'Arma primaria',
@@ -39,6 +41,15 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
 
   const canEdit = profile?.role === 'editor' || profile?.role === 'admin';
 
+  const { data: favorite } = user
+    ? await supabase
+        .from('favorites')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .eq('loadout_id', loadout.id)
+        .maybeSingle()
+    : { data: null };
+
   const { data: weaponsData } = await supabase
     .from('loadout_weapons')
     .select('*, build:builds(*, category:categories(*))')
@@ -61,7 +72,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
         <img
           src={loadout.image_url}
           alt={loadout.title}
-          className="w-full max-h-80 object-cover rounded-xl border border-base-600 mb-5"
+          className="w-full max-h-96 object-contain rounded-xl border border-base-600 bg-base-900 mb-5"
         />
       )}
 
@@ -71,11 +82,19 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
           <h1 className="text-2xl md:text-3xl font-semibold text-slate-100 mt-1">{loadout.title}</h1>
           <p className="text-slate-400 text-sm mt-1">{loadout.author?.username}</p>
         </div>
-        {canEdit && (
-          <Link href={`/loadout/${loadout.id}/edit`} className="btn-secondary">
-            Modifica
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          <FavoriteButton
+            targetType="loadout"
+            targetId={loadout.id}
+            initialFavorite={!!favorite}
+            savesCount={loadout.saves_count}
+          />
+          {canEdit && (
+            <Link href={`/loadout/${loadout.id}/edit`} className="btn-secondary">
+              Modifica
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Warframe */}
@@ -196,6 +215,8 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
           </div>
         </section>
       )}
+
+      <CommentSection loadoutId={loadout.id} />
     </div>
   );
 }

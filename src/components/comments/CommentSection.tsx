@@ -4,8 +4,13 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { Comment } from '@/lib/types';
 
-export default function CommentSection({ buildId }: { buildId: string }) {
+type Props = { buildId: string; loadoutId?: never } | { buildId?: never; loadoutId: string };
+
+export default function CommentSection(props: Props) {
   const supabase = createClient();
+  const column = 'buildId' in props && props.buildId ? 'build_id' : 'loadout_id';
+  const targetId = ('buildId' in props ? props.buildId : props.loadoutId) as string;
+
   const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
@@ -16,7 +21,7 @@ export default function CommentSection({ buildId }: { buildId: string }) {
     const { data } = await supabase
       .from('comments')
       .select('*, author:profiles!comments_author_id_fkey(*)')
-      .eq('build_id', buildId)
+      .eq(column, targetId)
       .order('created_at', { ascending: true });
     setComments((data as Comment[]) ?? []);
     setLoading(false);
@@ -25,14 +30,14 @@ export default function CommentSection({ buildId }: { buildId: string }) {
   useEffect(() => {
     load();
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
-  }, [buildId]);
+  }, [targetId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim() || !currentUserId) return;
     setPosting(true);
     await supabase.from('comments').insert({
-      build_id: buildId,
+      [column]: targetId,
       author_id: currentUserId,
       content: content.trim(),
     });

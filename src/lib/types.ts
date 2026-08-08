@@ -90,7 +90,8 @@ export interface Build {
 
 export interface Comment {
   id: string;
-  build_id: string;
+  build_id: string | null;
+  loadout_id: string | null;
   author_id: string;
   parent_id: string | null;
   content: string;
@@ -139,6 +140,7 @@ export interface Loadout {
   companion_item_name: string | null;
   companion_weapon_build_id: string | null;
   companion_weapon_item_name: string | null;
+  saves_count: number;
   created_at: string;
   updated_at: string;
   // relazioni opzionali popolate in query
@@ -147,6 +149,7 @@ export interface Loadout {
   companion_build?: Build;
   companion_weapon_build?: Build;
   weapons?: LoadoutWeapon[];
+  is_favorite?: boolean;
 }
 
 export const CATEGORY_LABELS: Record<string, string> = {

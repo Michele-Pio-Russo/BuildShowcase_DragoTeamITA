@@ -11,13 +11,13 @@ export default function BuildCard({ build }: { build: Build }) {
       href={`/build/${build.id}`}
       className="card overflow-hidden hover:border-accent-500/40 transition-colors group flex flex-col"
     >
-      <div className="aspect-video bg-base-700 relative overflow-hidden">
+      <div className="aspect-video bg-base-900 relative overflow-hidden">
         {build.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={build.image_url}
             alt={build.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-3xl text-slate-600">

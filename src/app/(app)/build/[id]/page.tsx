@@ -99,7 +99,8 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         </div>
         <div className="flex items-center gap-2">
           <FavoriteButton
-            buildId={build.id}
+            targetType="build"
+            targetId={build.id}
             initialFavorite={!!favorite}
             savesCount={build.saves_count}
           />
@@ -233,7 +234,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         </section>
       )}
 
-      {history && history.length > 0 && (
+      {canEdit && history && history.length > 0 && (
         <section className="mb-6">
           <h2 className="text-lg font-medium text-slate-100 mb-2">Storico modifiche</h2>
           <div className="card divide-y divide-base-700">

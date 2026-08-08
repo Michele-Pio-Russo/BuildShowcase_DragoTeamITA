@@ -3,12 +3,16 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
+type Target = 'build' | 'loadout';
+
 export default function FavoriteButton({
-  buildId,
+  targetType,
+  targetId,
   initialFavorite,
   savesCount,
 }: {
-  buildId: string;
+  targetType: Target;
+  targetId: string;
   initialFavorite: boolean;
   savesCount: number;
 }) {
@@ -16,6 +20,9 @@ export default function FavoriteButton({
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [count, setCount] = useState(savesCount);
   const [loading, setLoading] = useState(false);
+
+  const table = targetType === 'build' ? 'builds' : 'loadouts';
+  const column = targetType === 'build' ? 'build_id' : 'loadout_id';
 
   async function toggle() {
     setLoading(true);
@@ -28,16 +35,16 @@ export default function FavoriteButton({
     }
 
     if (isFavorite) {
-      await supabase.from('favorites').delete().eq('user_id', user.id).eq('build_id', buildId);
+      await supabase.from('favorites').delete().eq('user_id', user.id).eq(column, targetId);
       await supabase
-        .from('builds')
+        .from(table)
         .update({ saves_count: Math.max(0, count - 1) })
-        .eq('id', buildId);
+        .eq('id', targetId);
       setCount((c) => Math.max(0, c - 1));
       setIsFavorite(false);
     } else {
-      await supabase.from('favorites').insert({ user_id: user.id, build_id: buildId });
-      await supabase.from('builds').update({ saves_count: count + 1 }).eq('id', buildId);
+      await supabase.from('favorites').insert({ user_id: user.id, [column]: targetId });
+      await supabase.from(table).update({ saves_count: count + 1 }).eq('id', targetId);
       setCount((c) => c + 1);
       setIsFavorite(true);
     }
