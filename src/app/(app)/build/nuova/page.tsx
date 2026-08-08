@@ -2,7 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import BuildForm from '@/components/build/BuildForm';
 import AccessDenied from '@/components/ui/AccessDenied';
 
-export default async function NuovaBuildPage() {
+export default async function NuovaBuildPage({
+  searchParams,
+}: {
+  searchParams: { r?: string };
+}) {
   const supabase = createClient();
   const {
     data: { user },
@@ -14,5 +18,5 @@ export default async function NuovaBuildPage() {
     return <AccessDenied />;
   }
 
-  return <BuildForm />;
+  return <BuildForm key={searchParams.r ?? 'default'} />;
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { Build, Category, Tag } from '@/lib/types';
@@ -318,8 +319,18 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-8">
+      {!isEditing && (
+        <div className="mb-4">
+          <Link href="/build" className="text-sm text-slate-400 hover:text-slate-200">
+            ← Torna alle build
+          </Link>
+        </div>
+      )}
+
       <h1 className="text-2xl font-semibold text-slate-100 mb-1">
-        {isEditing ? 'Modifica build' : 'Nuova build'}
+        {isEditing
+          ? 'Modifica build'
+          : `Nuova build ${CATEGORY_LABELS[selectedCategory?.slug ?? ''] ?? selectedCategory?.label ?? ''}`}
       </h1>
 
       <div className="flex items-center gap-2 my-5 overflow-x-auto">

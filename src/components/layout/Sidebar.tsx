@@ -80,9 +80,18 @@ export default function Sidebar({ profile }: { profile: Profile }) {
 
       {canEdit && (
         <div className="px-3 pb-3 space-y-1.5">
-          <Link href="/build/nuova" className="btn-gold w-full flex items-center justify-center gap-1.5">
+          <button
+            onClick={() => {
+              if (pathname === '/build/nuova') {
+                router.push(`/build/nuova?r=${Date.now()}`);
+              } else {
+                router.push('/build/nuova');
+              }
+            }}
+            className="btn-gold w-full flex items-center justify-center gap-1.5"
+          >
             <span>+</span> Nuova build
-          </Link>
+          </button>
           <Link
             href="/loadout/nuovo"
             className="btn-secondary w-full flex items-center justify-center gap-1.5 !text-xs"
