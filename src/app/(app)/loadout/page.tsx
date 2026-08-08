@@ -9,7 +9,7 @@ export default async function LoadoutListPage() {
   const { data: loadouts } = await supabase
     .from('loadouts')
     .select(
-      '*, author:profiles(*), warframe_build:builds!loadouts_warframe_build_id_fkey(*), companion_build:builds!loadouts_companion_build_id_fkey(*)'
+      '*, author:profiles!loadouts_author_id_fkey(*), warframe_build:builds!loadouts_warframe_build_id_fkey(*), companion_build:builds!loadouts_companion_build_id_fkey(*)'
     )
     .eq('status', 'pubblicata')
     .order('updated_at', { ascending: false })

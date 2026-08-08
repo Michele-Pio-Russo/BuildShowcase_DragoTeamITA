@@ -2,60 +2,69 @@
 
 import { useEffect, useState } from 'react';
 
-type ShardColor = 'Crimson' | 'Amber' | 'Azure' | 'Emerald' | 'Topaz' | 'Violet';
-type ShardTarget = 'Warframe' | 'Operatore/Drifter';
+type ShardColor = 'Crimson' | 'Amber' | 'Azure' | 'Topaz' | 'Violet' | 'Emerald';
 
 interface ShardRow {
   id: string;
   color: ShardColor;
-  target: ShardTarget;
   effect: string;
   customEffect: string;
   tauforged: boolean;
   quantity: string;
 }
 
-const COLORS: ShardColor[] = ['Crimson', 'Amber', 'Azure', 'Emerald', 'Topaz', 'Violet'];
-const TARGETS: ShardTarget[] = ['Warframe', 'Operatore/Drifter'];
+const COLORS: ShardColor[] = ['Crimson', 'Amber', 'Azure', 'Topaz', 'Violet', 'Emerald'];
 const CUSTOM = 'Personalizzato…';
 
-// Elenco indicativo degli effetti più comuni per colore/bersaglio.
-// Digital Extremes aggiorna periodicamente il sistema delle Archon Shard:
-// verifica sempre in gioco l'effetto esatto prima di affidarti a questa lista,
-// e usa "Personalizzato…" se non trovi l'opzione corretta.
-const EFFECTS: Record<ShardColor, Record<ShardTarget, string[]>> = {
-  Crimson: {
-    Warframe: ['Ability Strength +', 'Melee Damage +', 'Combo Duration +'],
-    'Operatore/Drifter': ['Void Damage +', 'Amp Critical Chance +'],
-  },
-  Amber: {
-    Warframe: ['Max Health +', 'Health Orb Effectiveness +'],
-    'Operatore/Drifter': ['Max Health +', 'Void Regen +'],
-  },
-  Azure: {
-    Warframe: ['Max Shield +', 'Max Energy +'],
-    'Operatore/Drifter': ['Max Energy +', 'Void Dash Regen +'],
-  },
-  Emerald: {
-    Warframe: ['Parkour Velocity +', 'Status Chance +'],
-    'Operatore/Drifter': ['Ability Efficiency +', 'Void Mode Duration +'],
-  },
-  Topaz: {
-    Warframe: ['Ability Range +', 'Ability Duration +'],
-    'Operatore/Drifter': ['Amp Range +', 'Void Sling Range +'],
-  },
-  Violet: {
-    Warframe: ['Health Regen +', 'Energy Regen +'],
-    'Operatore/Drifter': ['Magazine Capacity +', 'Reload Speed +'],
-  },
+// Effetti reali per colore, dalla wiki ufficiale di Warframe (wiki.warframe.com).
+// Il valore tra parentesi è il bonus della variante Tauforged.
+const EFFECTS: Record<ShardColor, string[]> = {
+  Crimson: [
+    'Melee Critical Damage +25% (+37.5%)',
+    'Primary Status Chance +25% (+37.5%)',
+    'Secondary Critical Chance +25% (+37.5%)',
+    'Ability Strength +10% (+15%)',
+    'Ability Duration +10% (+15%)',
+  ],
+  Amber: [
+    'Max Energy filled on Spawn +30% (+45%)',
+    'Effectiveness on Health Orbs +100% (+150%)',
+    'Effectiveness on Energy Orbs +50% (+75%)',
+    'Casting Speed +25% (+37.5%)',
+    'Parkour Velocity +15% (+22.5%)',
+  ],
+  Azure: [
+    'Max Health +150 (+225)',
+    'Shield Capacity +150 (+225)',
+    'Max Energy +50 (+75)',
+    'Armor +150 (+225)',
+    'Health Regeneration +5/s (+7.5/s)',
+  ],
+  Topaz: [
+    'Health per kill con danno Blast (max 300 / 450)',
+    'Rigenera Scudo su kill con danno Blast (+5 / +7.5)',
+    'Secondary Critical Chance per kill con status Heat (max +50% / +75%)',
+    'Ability Damage +10% (+15%) su nemici con status Radiation',
+  ],
+  Violet: [
+    'Ability Damage +10% (+15%) su nemici con status Electricity',
+    'Primary Electricity Damage +30% (+45%), + bonus per shard Crimson/Azure/Violet equipaggiate',
+    'Melee Critical Damage +25% (+37.5%), raddoppia con Energia Max > 500',
+    'Health Orb danno Energia, Energy Orb danno Health (+20% / +30%)',
+  ],
+  Emerald: [
+    'Danno da status Toxin +30% (+45%)',
+    'Recupera Health per tick di status Toxin (+2 / +3)',
+    'Ability Damage +10% (+15%) su nemici con status Corrosion',
+    'Stack massimi di Corrosion +2 (+3)',
+  ],
 };
 
 function emptyRow(): ShardRow {
   return {
     id: crypto.randomUUID(),
     color: 'Crimson',
-    target: 'Warframe',
-    effect: EFFECTS.Crimson.Warframe[0],
+    effect: EFFECTS.Crimson[0],
     customEffect: '',
     tauforged: false,
     quantity: '1',
@@ -69,7 +78,7 @@ function buildSummary(rows: ShardRow[]): string {
       if (!effect) return null;
       const tf = r.tauforged ? 'Tauforged ' : '';
       const qty = r.quantity && r.quantity !== '1' ? `${r.quantity}x ` : '';
-      return `${qty}${tf}${r.color} (${r.target}) — ${effect}`;
+      return `${qty}${tf}${r.color} — ${effect}`;
     })
     .filter(Boolean)
     .join('; ');
@@ -106,21 +115,15 @@ export default function ArchonShardPicker({
   }
 
   function handleColorChange(id: string, color: ShardColor) {
-    const row = rows.find((r) => r.id === id);
-    const target = row?.target ?? 'Warframe';
-    update(id, { color, effect: EFFECTS[color][target][0] });
-  }
-
-  function handleTargetChange(id: string, target: ShardTarget) {
-    const row = rows.find((r) => r.id === id);
-    const color = row?.color ?? 'Crimson';
-    update(id, { target, effect: EFFECTS[color][target][0] });
+    update(id, { color, effect: EFFECTS[color][0] });
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm text-slate-300">Archon Shards consigliate</label>
+        <label className="text-sm text-slate-300">
+          Archon Shards consigliate <span className="text-slate-500">(solo Warframe)</span>
+        </label>
         <button onClick={addRow} className="text-xs text-accent-400 hover:text-accent-300">
           + Aggiungi shard
         </button>
@@ -131,12 +134,6 @@ export default function ArchonShardPicker({
           Valore precedente: &quot;{legacyText}&quot; — aggiungi righe qui sotto per sostituirlo.
         </p>
       )}
-
-      <p className="text-xs text-slate-500 mb-3">
-        Elenco indicativo degli effetti: verifica sempre in gioco l&apos;effetto esatto, gli
-        sviluppatori aggiornano periodicamente il sistema. Usa &quot;Personalizzato…&quot; se non
-        trovi l&apos;opzione giusta.
-      </p>
 
       <div className="space-y-2">
         {rows.map((r) => (
@@ -153,22 +150,13 @@ export default function ArchonShardPicker({
               ))}
             </select>
             <select
-              className="input-base col-span-2 !text-xs"
-              value={r.target}
-              onChange={(e) => handleTargetChange(r.id, e.target.value as ShardTarget)}
-            >
-              {TARGETS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <select
-              className="input-base col-span-3 !text-xs"
+              className={`input-base !text-xs ${
+                r.effect === CUSTOM ? 'col-span-5' : 'col-span-6'
+              }`}
               value={r.effect}
               onChange={(e) => update(r.id, { effect: e.target.value })}
             >
-              {EFFECTS[r.color][r.target].map((eff) => (
+              {EFFECTS[r.color].map((eff) => (
                 <option key={eff} value={eff}>
                   {eff}
                 </option>
@@ -177,14 +165,14 @@ export default function ArchonShardPicker({
             </select>
             {r.effect === CUSTOM && (
               <input
-                className="input-base col-span-2 !text-xs"
+                className="input-base col-span-3 !text-xs"
                 placeholder="Effetto personalizzato"
                 value={r.customEffect}
                 onChange={(e) => update(r.id, { customEffect: e.target.value })}
               />
             )}
             <input
-              className={`input-base !text-xs ${r.effect === CUSTOM ? 'col-span-1' : 'col-span-2'}`}
+              className="input-base col-span-1 !text-xs"
               type="number"
               min={1}
               max={5}
@@ -192,13 +180,13 @@ export default function ArchonShardPicker({
               onChange={(e) => update(r.id, { quantity: e.target.value })}
               title="Quantità"
             />
-            <label className="col-span-1 flex items-center gap-1 text-[10px] text-slate-400">
+            <label className="col-span-2 flex items-center gap-1 text-[10px] text-slate-400">
               <input
                 type="checkbox"
                 checked={r.tauforged}
                 onChange={(e) => update(r.id, { tauforged: e.target.checked })}
               />
-              TF
+              Tauforged
             </label>
             <button
               onClick={() => removeRow(r.id)}

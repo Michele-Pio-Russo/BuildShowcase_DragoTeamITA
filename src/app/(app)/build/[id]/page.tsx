@@ -5,6 +5,7 @@ import type { Build, BuildMod, Profile, BuildHistoryEntry, Tag } from '@/lib/typ
 import { CATEGORY_LABELS } from '@/lib/types';
 import FavoriteButton from '@/components/build/FavoriteButton';
 import DuplicateButton from '@/components/build/DuplicateButton';
+import DeleteBuildButton from '@/components/build/DeleteBuildButton';
 import CommentSection from '@/components/comments/CommentSection';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -17,7 +18,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
 
   const { data: build } = await supabase
     .from('builds')
-    .select('*, category:categories(*), author:profiles(*)')
+    .select('*, category:categories(*), author:profiles!builds_author_id_fkey(*)')
     .eq('id', params.id)
     .single<Build>();
 
@@ -30,6 +31,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
     .single<Profile>();
 
   const canEdit = profile?.role === 'editor' || profile?.role === 'admin';
+  const canDelete = profile?.role === 'admin' || (profile?.role === 'editor' && build.author_id === user?.id);
 
   const [{ data: mods }, { data: buildTags }, { data: history }, { data: favorite }] =
     await Promise.all([
@@ -37,7 +39,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
       supabase.from('build_tags').select('tag:tags(*)').eq('build_id', build.id),
       supabase
         .from('build_history')
-        .select('*, editor:profiles(*)')
+        .select('*, editor:profiles!build_history_editor_id_fkey(*)')
         .eq('build_id', build.id)
         .order('changed_at', { ascending: false })
         .limit(10),
@@ -107,6 +109,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
               <DuplicateButton build={build} mods={(mods as BuildMod[]) ?? []} />
             </>
           )}
+          {canDelete && <DeleteBuildButton buildId={build.id} buildTitle={build.title} />}
         </div>
       </div>
 

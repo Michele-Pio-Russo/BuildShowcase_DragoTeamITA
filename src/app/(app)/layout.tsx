@@ -3,6 +3,14 @@ import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
 import type { Profile } from '@/lib/types';
 
+// Disattiva la cache dei dati di Next.js per tutte le pagine di questa
+// sezione: senza questo, subito dopo aver creato una build/loadout può
+// capitare che la pagina di dettaglio mostri "non trovato" perché legge
+// una risposta cache precedente alla creazione, invece di interrogare
+// di nuovo Supabase.
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 // Nota: il middleware (src/middleware.ts) blocca già l'accesso a queste
 // pagine per chi non è autenticato, quindi qui NON usiamo redirect() di
 // next/navigation: in dev, con Fast Refresh, un redirect() lato Server

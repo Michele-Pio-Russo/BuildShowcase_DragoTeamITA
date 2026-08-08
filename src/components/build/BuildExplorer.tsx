@@ -45,7 +45,7 @@ export default function BuildExplorer({ fixedCategorySlug }: { fixedCategorySlug
 
       let query = supabase
         .from('builds')
-        .select('*, category:categories(*), author:profiles(*), build_tags(tag:tags(*))')
+        .select('*, category:categories(*), author:profiles!builds_author_id_fkey(*), build_tags(tag:tags(*))')
         .eq('status', 'pubblicata');
 
       if (categoryFilter) {

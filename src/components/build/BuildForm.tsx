@@ -34,7 +34,6 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
   const [modsImageFile, setModsImageFile] = useState<File | null>(null);
   const [forma, setForma] = useState(existingBuild?.forma ?? '');
   const [polarity, setPolarity] = useState(existingBuild?.polarity ?? '');
-  const [reattore, setReattore] = useState(existingBuild?.reattore ?? false);
   const [aura, setAura] = useState(existingBuild?.aura ?? '');
   const [exilus, setExilus] = useState(existingBuild?.exilus ?? '');
   const [arcane, setArcane] = useState(existingBuild?.arcane ?? '');
@@ -139,7 +138,6 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
       playstyle_md: playstyle,
       forma: forma || null,
       polarity: polarity || null,
-      reattore,
       aura: aura || null,
       exilus: exilus || null,
       arcane: arcane || null,
@@ -395,11 +393,6 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
           <div className="pt-2 border-t border-base-700">
             <ArchonShardPicker value={archonShards} onChange={setArchonShards} />
           </div>
-
-          <label className="flex items-center gap-2 text-sm text-slate-300">
-            <input type="checkbox" checked={reattore} onChange={(e) => setReattore(e.target.checked)} />
-            Reattore / Catalizzatore installato
-          </label>
         </div>
       )}
 

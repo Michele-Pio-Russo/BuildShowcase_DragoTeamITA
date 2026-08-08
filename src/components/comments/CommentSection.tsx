@@ -15,7 +15,7 @@ export default function CommentSection({ buildId }: { buildId: string }) {
   async function load() {
     const { data } = await supabase
       .from('comments')
-      .select('*, author:profiles(*)')
+      .select('*, author:profiles!comments_author_id_fkey(*)')
       .eq('build_id', buildId)
       .order('created_at', { ascending: true });
     setComments((data as Comment[]) ?? []);

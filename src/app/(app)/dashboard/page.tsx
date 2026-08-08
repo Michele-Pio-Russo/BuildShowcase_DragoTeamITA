@@ -11,19 +11,19 @@ export default async function DashboardPage() {
       supabase.from('builds').select('*', { count: 'exact', head: true }).eq('status', 'pubblicata'),
       supabase
         .from('builds')
-        .select('*, category:categories(*), author:profiles(*)')
+        .select('*, category:categories(*), author:profiles!builds_author_id_fkey(*)')
         .eq('status', 'pubblicata')
         .order('created_at', { ascending: false })
         .limit(4),
       supabase
         .from('builds')
-        .select('*, category:categories(*), author:profiles(*)')
+        .select('*, category:categories(*), author:profiles!builds_author_id_fkey(*)')
         .eq('status', 'pubblicata')
         .order('saves_count', { ascending: false })
         .limit(4),
       supabase
         .from('comments')
-        .select('*, author:profiles(*), build:builds(id, title)')
+        .select('*, author:profiles!comments_author_id_fkey(*), build:builds(id, title)')
         .order('created_at', { ascending: false })
         .limit(5),
     ]);

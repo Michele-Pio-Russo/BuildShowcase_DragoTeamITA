@@ -10,7 +10,7 @@ export default async function PreferitiPage() {
 
   const { data: favs } = await supabase
     .from('favorites')
-    .select('build:builds(*, category:categories(*), author:profiles(*))')
+    .select('build:builds(*, category:categories(*), author:profiles!builds_author_id_fkey(*))')
     .eq('user_id', user?.id ?? '')
     .order('created_at', { ascending: false });
 

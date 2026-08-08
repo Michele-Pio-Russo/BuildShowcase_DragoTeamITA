@@ -20,7 +20,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
   const { data: loadout } = await supabase
     .from('loadouts')
     .select(
-      `*, author:profiles(*),
+      `*, author:profiles!loadouts_author_id_fkey(*),
        warframe_build:builds!loadouts_warframe_build_id_fkey(*, category:categories(*)),
        companion_build:builds!loadouts_companion_build_id_fkey(*, category:categories(*)),
        companion_weapon_build:builds!loadouts_companion_weapon_build_id_fkey(*, category:categories(*))`
