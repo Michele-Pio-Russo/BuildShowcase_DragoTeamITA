@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import type { Build, BuildMod, Profile, BuildHistoryEntry, Tag } from '@/lib/types';
+import type { Build, BuildMod, BuildModImage, Profile, BuildHistoryEntry, Tag } from '@/lib/types';
 import { CATEGORY_LABELS } from '@/lib/types';
 import FavoriteButton from '@/components/build/FavoriteButton';
 import DuplicateButton from '@/components/build/DuplicateButton';
@@ -34,9 +34,10 @@ export default async function BuildDetailPage({ params }: { params: { id: string
   const canEdit = profile?.role === 'editor' || profile?.role === 'admin';
   const canDelete = profile?.role === 'admin' || (profile?.role === 'editor' && build.author_id === user?.id);
 
-  const [{ data: mods }, { data: buildTags }, { data: history }, { data: favorite }] =
+  const [{ data: mods }, { data: modImages }, { data: buildTags }, { data: history }, { data: favorite }] =
     await Promise.all([
       supabase.from('build_mods').select('*').eq('build_id', build.id).order('ordine'),
+      supabase.from('build_mod_images').select('*').eq('build_id', build.id).order('ordine'),
       supabase.from('build_tags').select('tag:tags(*)').eq('build_id', build.id),
       supabase
         .from('build_history')
@@ -121,7 +122,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         <Prop label="Creata" value={new Date(build.created_at).toLocaleDateString('it-IT')} />
         <Prop label="Aggiornata" value={new Date(build.updated_at).toLocaleDateString('it-IT')} />
         {build.forma && <Prop label="Forma" value={build.forma} />}
-        {build.polarity && <Prop label="Polarità" value={build.polarity} />}
+        {build.stile && <Prop label="Stile" value={build.stile} />}
         {build.reattore && <Prop label="Reattore/Catalizzatore" value="Sì" />}
         {build.aura && <Prop label="Aura" value={build.aura} />}
         {build.exilus && <Prop label="Exilus" value={build.exilus} />}
@@ -158,7 +159,24 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         </section>
       )}
 
-      {build.mods_image_url ? (
+      {modImages && modImages.length > 0 ? (
+        <section className="mb-6">
+          <h2 className="text-lg font-medium text-slate-100 mb-2">Configurazione mod</h2>
+          <div className="space-y-4">
+            {(modImages as BuildModImage[]).map((mi) => (
+              <div key={mi.id}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={mi.image_url}
+                  alt={mi.caption ?? 'Configurazione mod'}
+                  className="w-full max-h-[32rem] object-contain rounded-xl border border-base-600 bg-base-900"
+                />
+                {mi.caption && <p className="text-sm text-slate-400 mt-1.5">{mi.caption}</p>}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : build.mods_image_url ? (
         <section className="mb-6">
           <h2 className="text-lg font-medium text-slate-100 mb-2">Configurazione mod</h2>
           {/* eslint-disable-next-line @next/next/no-img-element */}

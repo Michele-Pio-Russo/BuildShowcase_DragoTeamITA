@@ -9,6 +9,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { preserveLineBreaks } from '@/lib/markdown';
 import ArchonShardPicker from './ArchonShardPicker';
+import BuildTypePicker from './BuildTypePicker';
+import { getCategoryFieldFlags } from '@/lib/buildFields';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -23,6 +25,10 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
   const [categories, setCategories] = useState<Category[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
 
+  // Step 0 — scelta del tipo di build (solo in creazione)
+  const [showForm, setShowForm] = useState(isEditing);
+  const [pendingTypeSlug, setPendingTypeSlug] = useState<string | null>(null);
+
   // Step 1
   const [title, setTitle] = useState(existingBuild?.title ?? '');
   const [categoryId, setCategoryId] = useState(existingBuild?.category_id ?? '');
@@ -30,11 +36,15 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
   const [imageUrl, setImageUrl] = useState(existingBuild?.image_url ?? '');
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // Step 2 — mod solo via screenshot
-  const [modsImageUrl, setModsImageUrl] = useState(existingBuild?.mods_image_url ?? '');
-  const [modsImageFile, setModsImageFile] = useState<File | null>(null);
+  // Step 2 — mod: uno o più screenshot con didascalia, più i campi specifici del tipo
+  type ModImageEntry = { key: string; id?: string; file: File | null; url: string; caption: string };
+  const [modImages, setModImages] = useState<ModImageEntry[]>(
+    existingBuild?.mods_image_url
+      ? [{ key: 'legacy', file: null, url: existingBuild.mods_image_url, caption: '' }]
+      : []
+  );
   const [forma, setForma] = useState(existingBuild?.forma ?? '');
-  const [polarity, setPolarity] = useState(existingBuild?.polarity ?? '');
+  const [stile, setStile] = useState(existingBuild?.stile ?? '');
   const [aura, setAura] = useState(existingBuild?.aura ?? '');
   const [exilus, setExilus] = useState(existingBuild?.exilus ?? '');
   const [arcane, setArcane] = useState(existingBuild?.arcane ?? '');
@@ -60,9 +70,52 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
           .select('tag:tags(*)')
           .eq('build_id', existingBuild.id);
         setSelectedTags((existingTags ?? []).map((t: any) => t.tag?.nome).filter(Boolean));
+
+        const { data: existingModImages } = await supabase
+          .from('build_mod_images')
+          .select('*')
+          .eq('build_id', existingBuild.id)
+          .order('ordine');
+        if (existingModImages && existingModImages.length > 0) {
+          setModImages(
+            existingModImages.map((mi: any) => ({
+              key: mi.id,
+              id: mi.id,
+              file: null,
+              url: mi.image_url,
+              caption: mi.caption ?? '',
+            }))
+          );
+        }
       }
     })();
   }, [existingBuild]);
+
+  // Una volta arrivate le categorie, risolvo lo slug scelto nello step 0 nell'id categoria reale
+  useEffect(() => {
+    if (pendingTypeSlug && categories.length > 0) {
+      const found = categories.find((c) => c.slug === pendingTypeSlug);
+      if (found) {
+        setCategoryId(found.id);
+        setShowForm(true);
+        setPendingTypeSlug(null);
+      }
+    }
+  }, [pendingTypeSlug, categories]);
+
+  function chooseType(slug: string) {
+    const found = categories.find((c) => c.slug === slug);
+    if (found) {
+      setCategoryId(found.id);
+      setShowForm(true);
+    } else {
+      // categorie non ancora caricate: le risolvo appena arrivano
+      setPendingTypeSlug(slug);
+    }
+  }
+
+  const selectedCategory = categories.find((c) => c.id === categoryId);
+  const fieldFlags = getCategoryFieldFlags(selectedCategory?.slug);
 
   function toggleTag(name: string) {
     setSelectedTags((prev) =>
@@ -93,19 +146,48 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
     return data.publicUrl;
   }
 
-  async function uploadModsImageIfNeeded(): Promise<string | null> {
-    if (!modsImageFile) return modsImageUrl || null;
-    const ext = modsImageFile.name.split('.').pop();
-    const path = `mods-${crypto.randomUUID()}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from('build-images')
-      .upload(path, modsImageFile);
-    if (uploadError) {
-      setError('Errore nel caricamento screenshot mod: ' + uploadError.message);
-      return null;
+  function addModImageSlot() {
+    setModImages((prev) => [...prev, { key: crypto.randomUUID(), file: null, url: '', caption: '' }]);
+  }
+
+  function removeModImage(key: string) {
+    setModImages((prev) => prev.filter((m) => m.key !== key));
+  }
+
+  function updateModImageUrl(key: string, url: string) {
+    setModImages((prev) =>
+      prev.map((m) => (m.key === key ? { ...m, url, file: url ? null : m.file } : m))
+    );
+  }
+
+  function updateModImageFile(key: string, file: File | null) {
+    setModImages((prev) => prev.map((m) => (m.key === key ? { ...m, file } : m)));
+  }
+
+  function updateModImageCaption(key: string, caption: string) {
+    setModImages((prev) => prev.map((m) => (m.key === key ? { ...m, caption } : m)));
+  }
+
+  async function uploadModImages(): Promise<{ url: string; caption: string }[]> {
+    const results: { url: string; caption: string }[] = [];
+    for (const entry of modImages) {
+      if (entry.file) {
+        const ext = entry.file.name.split('.').pop();
+        const path = `mods-${crypto.randomUUID()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('build-images')
+          .upload(path, entry.file);
+        if (uploadError) {
+          setError('Errore nel caricamento di uno screenshot mod: ' + uploadError.message);
+          continue;
+        }
+        const { data } = supabase.storage.from('build-images').getPublicUrl(path);
+        results.push({ url: data.publicUrl, caption: entry.caption });
+      } else if (entry.url) {
+        results.push({ url: entry.url, caption: entry.caption });
+      }
     }
-    const { data } = supabase.storage.from('build-images').getPublicUrl(path);
-    return data.publicUrl;
+    return results;
   }
 
   async function persist(status: 'bozza' | 'pubblicata') {
@@ -127,7 +209,6 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
     }
 
     const finalImageUrl = await uploadImageIfNeeded();
-    const finalModsImageUrl = await uploadModsImageIfNeeded();
 
     const payload = {
       title: title.trim(),
@@ -138,13 +219,12 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
       description_md: description,
       playstyle_md: playstyle,
       forma: forma || null,
-      polarity: polarity || null,
+      stile: stile || null,
       aura: aura || null,
       exilus: exilus || null,
       arcane: arcane || null,
       focus_school: focusSchool || null,
       archon_shards: archonShards || null,
-      mods_image_url: finalModsImageUrl,
     };
 
     let buildId = existingBuild?.id;
@@ -201,6 +281,20 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
       }
     }
 
+    // galleria immagini mod: sostituisco tutte le voci con quelle correnti
+    const uploadedModImages = await uploadModImages();
+    await supabase.from('build_mod_images').delete().eq('build_id', buildId);
+    if (uploadedModImages.length > 0) {
+      await supabase.from('build_mod_images').insert(
+        uploadedModImages.map((img, idx) => ({
+          build_id: buildId,
+          image_url: img.url,
+          caption: img.caption || null,
+          ordine: idx,
+        }))
+      );
+    }
+
     setSaving(false);
     router.push(`/build/${buildId}`);
     router.refresh();
@@ -214,6 +308,10 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
   ];
 
   const mainImagePreview = imageFile ? URL.createObjectURL(imageFile) : imageUrl;
+
+  if (!showForm) {
+    return <BuildTypePicker onChoose={chooseType} />;
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-8">
@@ -257,18 +355,31 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-slate-300 mb-1">Categoria *</label>
-              <select
-                className="input-base"
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-              >
-                <option value="">Seleziona…</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {CATEGORY_LABELS[c.slug] ?? c.label}
-                  </option>
-                ))}
-              </select>
+              {isEditing ? (
+                <select
+                  className="input-base"
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                >
+                  <option value="">Seleziona…</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {CATEGORY_LABELS[c.slug] ?? c.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="input-base flex items-center justify-between">
+                  <span>{CATEGORY_LABELS[selectedCategory?.slug ?? ''] ?? selectedCategory?.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="text-xs text-accent-300 hover:underline shrink-0 ml-2"
+                  >
+                    Cambia tipo
+                  </button>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm text-slate-300 mb-1">Nome oggetto *</label>
@@ -319,43 +430,55 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
         <div className="card p-5 space-y-5">
           <div>
             <label className="text-sm text-slate-300 mb-2 block">Configurazione mod</label>
-            <p className="text-xs text-slate-500 mb-2">
-              Carica uno screenshot dell&apos;intera configurazione (dal gioco o dall&apos;app di
-              terze parti che usi).
+            <p className="text-xs text-slate-500 mb-3">
+              Carica uno o più screenshot (es. build diverse per situazioni diverse), ognuno con la
+              sua didascalia — come quando pubblichi build su Discord.
             </p>
-            {(modsImageFile || modsImageUrl) && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={modsImageFile ? URL.createObjectURL(modsImageFile) : modsImageUrl}
-                alt="Anteprima configurazione mod"
-                className="w-full max-h-64 object-contain rounded-lg border border-base-600 mb-3 bg-base-900"
-              />
-            )}
-            <label className="block text-sm text-slate-300 mb-1">Immagine (URL)</label>
-            <input
-              className="input-base"
-              value={modsImageUrl}
-              onChange={(e) => {
-                setModsImageUrl(e.target.value);
-                if (e.target.value) setModsImageFile(null);
-              }}
-              placeholder="https://…"
-            />
-            <p className="text-xs text-slate-500 mt-1">oppure carica un file:</p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setModsImageFile(e.target.files?.[0] ?? null)}
-              className="text-xs text-slate-400 mt-1"
-            />
-            {(modsImageFile || modsImageUrl) && (
-              <p className="text-xs text-emerald-400/80 mt-1">
-                ✓ Screenshot selezionato — resta collegato anche cambiando schermata.
-              </p>
-            )}
+            <div className="space-y-4">
+              {modImages.map((entry, idx) => (
+                <div key={entry.key} className="border border-base-600 rounded-lg p-3 space-y-2">
+                  {(entry.file || entry.url) && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={entry.file ? URL.createObjectURL(entry.file) : entry.url}
+                      alt={`Screenshot mod ${idx + 1}`}
+                      className="w-full max-h-64 object-contain rounded-lg bg-base-900"
+                    />
+                  )}
+                  <input
+                    className="input-base"
+                    value={entry.url}
+                    onChange={(e) => updateModImageUrl(entry.key, e.target.value)}
+                    placeholder="https://…"
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => updateModImageFile(entry.key, e.target.files?.[0] ?? null)}
+                    className="text-xs text-slate-400"
+                  />
+                  <input
+                    className="input-base"
+                    value={entry.caption}
+                    onChange={(e) => updateModImageCaption(entry.key, e.target.value)}
+                    placeholder='Didascalia (es. "Build A — per il corrosivo")'
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeModImage(entry.key)}
+                    className="text-xs text-red-400 hover:underline"
+                  >
+                    Rimuovi immagine
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={addModImageSlot} className="btn-secondary mt-3">
+              + Aggiungi immagine
+            </button>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4 pt-2 border-t border-base-700">
             <div>
               <label className="block text-sm text-slate-300 mb-1">Forma</label>
               <input
@@ -365,35 +488,52 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
                 placeholder="es. 3x V, 1x -"
               />
             </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Polarità</label>
-              <input className="input-base" value={polarity} onChange={(e) => setPolarity(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Aura</label>
-              <input className="input-base" value={aura} onChange={(e) => setAura(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Exilus</label>
-              <input className="input-base" value={exilus} onChange={(e) => setExilus(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Arcane</label>
-              <input className="input-base" value={arcane} onChange={(e) => setArcane(e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1">Focus School consigliata</label>
-              <input
-                className="input-base"
-                value={focusSchool}
-                onChange={(e) => setFocusSchool(e.target.value)}
-              />
-            </div>
+            {fieldFlags.showStile && (
+              <div>
+                <label className="block text-sm text-slate-300 mb-1">Stile</label>
+                <input
+                  className="input-base"
+                  value={stile}
+                  onChange={(e) => setStile(e.target.value)}
+                  placeholder="es. Tempo Royale"
+                />
+              </div>
+            )}
+            {fieldFlags.showAura && (
+              <div>
+                <label className="block text-sm text-slate-300 mb-1">Aura</label>
+                <input className="input-base" value={aura} onChange={(e) => setAura(e.target.value)} />
+              </div>
+            )}
+            {fieldFlags.showExilus && (
+              <div>
+                <label className="block text-sm text-slate-300 mb-1">Exilus</label>
+                <input className="input-base" value={exilus} onChange={(e) => setExilus(e.target.value)} />
+              </div>
+            )}
+            {fieldFlags.showArcane && (
+              <div>
+                <label className="block text-sm text-slate-300 mb-1">Arcane</label>
+                <input className="input-base" value={arcane} onChange={(e) => setArcane(e.target.value)} />
+              </div>
+            )}
+            {fieldFlags.showFocusSchool && (
+              <div>
+                <label className="block text-sm text-slate-300 mb-1">Focus School consigliata</label>
+                <input
+                  className="input-base"
+                  value={focusSchool}
+                  onChange={(e) => setFocusSchool(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="pt-2 border-t border-base-700">
-            <ArchonShardPicker value={archonShards} onChange={setArchonShards} />
-          </div>
+          {fieldFlags.showArchonShards && (
+            <div className="pt-2 border-t border-base-700">
+              <ArchonShardPicker value={archonShards} onChange={setArchonShards} />
+            </div>
+          )}
         </div>
       )}
 
@@ -479,8 +619,8 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
             ))}
           </div>
           <p className="text-xs text-slate-500">
-            {modsImageFile || modsImageUrl
-              ? 'Screenshot configurazione mod allegato'
+            {modImages.length > 0
+              ? `${modImages.length} screenshot configurazione mod allegati`
               : 'Nessuno screenshot mod caricato'}
           </p>
         </div>

@@ -29,7 +29,7 @@ export default function DuplicateButton({ build, mods }: { build: Build; mods: B
         description_md: build.description_md,
         playstyle_md: build.playstyle_md,
         forma: build.forma,
-        polarity: build.polarity,
+        stile: build.stile,
         reattore: build.reattore,
         aura: build.aura,
         exilus: build.exilus,
@@ -54,6 +54,22 @@ export default function DuplicateButton({ build, mods }: { build: Build; mods: B
           slot: m.slot,
           note: m.note,
           ordine: m.ordine,
+        }))
+      );
+    }
+
+    const { data: existingModImages } = await supabase
+      .from('build_mod_images')
+      .select('*')
+      .eq('build_id', build.id)
+      .order('ordine');
+    if (existingModImages && existingModImages.length > 0) {
+      await supabase.from('build_mod_images').insert(
+        existingModImages.map((mi: any) => ({
+          build_id: newBuild.id,
+          image_url: mi.image_url,
+          caption: mi.caption,
+          ordine: mi.ordine,
         }))
       );
     }

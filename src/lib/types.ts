@@ -33,6 +33,14 @@ export interface BuildMod {
   ordine: number;
 }
 
+export interface BuildModImage {
+  id: string;
+  build_id: string;
+  image_url: string;
+  caption: string | null;
+  ordine: number;
+}
+
 export interface BuildStats {
   critica?: string;
   status?: string;
@@ -59,6 +67,7 @@ export interface Build {
   forma: string | null;
   polarity: string | null;
   reattore: boolean;
+  stile: string | null;
   aura: string | null;
   exilus: string | null;
   arcane: string | null;
@@ -74,6 +83,7 @@ export interface Build {
   category?: Category;
   author?: Profile;
   mods?: BuildMod[];
+  mod_images?: BuildModImage[];
   tags?: Tag[];
   is_favorite?: boolean;
 }
