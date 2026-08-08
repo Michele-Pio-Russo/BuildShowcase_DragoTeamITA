@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { Loadout, LoadoutWeapon, Profile, WeaponSlot } from '@/lib/types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { preserveLineBreaks } from '@/lib/markdown';
 
 const slotLabels: Record<WeaponSlot, string> = {
   primaria: 'Arma primaria',
@@ -191,7 +192,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
         <section className="mb-6">
           <h2 className="text-lg font-medium text-slate-100 mb-2">Note e strategia</h2>
           <div className="prose prose-invert prose-sm max-w-none text-slate-300">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{loadout.notes_md}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{preserveLineBreaks(loadout.notes_md)}</ReactMarkdown>
           </div>
         </section>
       )}

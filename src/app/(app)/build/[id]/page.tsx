@@ -9,6 +9,7 @@ import DeleteBuildButton from '@/components/build/DeleteBuildButton';
 import CommentSection from '@/components/comments/CommentSection';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { preserveLineBreaks } from '@/lib/markdown';
 
 export default async function BuildDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -83,7 +84,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         <img
           src={build.image_url}
           alt={build.title}
-          className="w-full max-h-80 object-cover rounded-xl border border-base-600 mb-5"
+          className="w-full max-h-96 object-contain rounded-xl border border-base-600 bg-base-900 mb-5"
         />
       )}
 
@@ -143,7 +144,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         <section className="mb-6">
           <h2 className="text-lg font-medium text-slate-100 mb-2">Descrizione</h2>
           <div className="prose prose-invert prose-sm max-w-none text-slate-300">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{build.description_md}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{preserveLineBreaks(build.description_md)}</ReactMarkdown>
           </div>
         </section>
       )}
@@ -152,7 +153,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         <section className="mb-6">
           <h2 className="text-lg font-medium text-slate-100 mb-2">Stile di gioco e casi d&apos;uso</h2>
           <div className="prose prose-invert prose-sm max-w-none text-slate-300">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{build.playstyle_md}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{preserveLineBreaks(build.playstyle_md)}</ReactMarkdown>
           </div>
         </section>
       )}
