@@ -21,6 +21,11 @@ const SEGMENT_LABELS: Record<string, string> = {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Segmenti che compaiono nell'URL ma non hanno una propria pagina raggiungibile
+// (esistono solo le loro sottopagine) — nel breadcrumb restano come testo semplice,
+// non cliccabile, per evitare un 404.
+const NON_NAVIGABLE_SEGMENTS = new Set(['categoria', 'admin']);
+
 export default function Breadcrumbs() {
   const pathname = usePathname();
   const supabase = createClient();
@@ -50,7 +55,9 @@ export default function Breadcrumbs() {
 
   if (segments.length === 0 || pathname === '/dashboard') return null;
 
-  const crumbs: { label: string; href: string }[] = [{ label: 'Home', href: '/dashboard' }];
+  const crumbs: { label: string; href: string; clickable: boolean }[] = [
+    { label: 'Home', href: '/dashboard', clickable: true },
+  ];
   let hrefAcc = '';
   segments.forEach((seg) => {
     hrefAcc += `/${seg}`;
@@ -64,7 +71,7 @@ export default function Breadcrumbs() {
         label = seg;
       }
     }
-    crumbs.push({ label, href: hrefAcc });
+    crumbs.push({ label, href: hrefAcc, clickable: !NON_NAVIGABLE_SEGMENTS.has(seg) });
   });
 
   return (
@@ -72,7 +79,7 @@ export default function Breadcrumbs() {
       {crumbs.map((c, i) => (
         <span key={c.href} className="flex items-center gap-1.5">
           {i > 0 && <span className="text-slate-700">/</span>}
-          {i === crumbs.length - 1 ? (
+          {i === crumbs.length - 1 || !c.clickable ? (
             <span className="text-slate-300">{c.label}</span>
           ) : (
             <Link href={c.href} className="hover:text-slate-300">
