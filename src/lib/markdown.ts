@@ -1,26 +1,30 @@
 /**
- * Markdown distingue due casi che l'utente scrive nello stesso modo (premendo Invio):
+ * Vogliamo che ogni singolo Invio dell'utente produca un ritorno a capo visibile —
+ * comprese le righe vuote multiple consecutive (es. 3 Invio di fila = 2 righe vuote
+ * visibili, non una sola).
  *
- * 1. Una RIGA VUOTA tra due blocchi di testo → Markdown la riconosce già come separatore
- *    di paragrafo, e mostra uno spazio visibile tra i due blocchi. Questo caso va
- *    lasciato intatto (\n\n), altrimenti si perde la spaziatura tra paragrafi.
+ * Markdown però, per specifica, ignora sia gli a capo singoli (li tratta come uno
+ * spazio) sia le righe vuote multiple consecutive (le comprime tutte in un unico
+ * separatore di paragrafo). Per bypassare questo comportamento:
  *
- * 2. Un A CAPO SINGOLO (nessuna riga vuota in mezzo) → per specifica, Markdown lo
- *    ignora e lo tratta come uno spazio, unendo le due righe in una sola. Questo caso
- *    va trasformato in un hard break esplicito (due spazi + newline) per far sì che
- *    l'a capo dell'utente venga effettivamente rispettato, senza però aggiungere lo
- *    spazio extra di un nuovo paragrafo.
- *
- * Prima normalizziamo tutti i tipi di ritorno a capo (Windows \r\n, vecchio Mac \r,
- * Unix \n) in un unico \n, poi dividiamo il testo nei blocchi già separati da riga
- * vuota, e solo AGLI a capo singoli dentro ciascun blocco applichiamo l'hard break.
+ * 1. Normalizziamo tutti i tipi di ritorno a capo (Windows \r\n, vecchio Mac \r,
+ *    Unix \n) in un unico \n.
+ * 2. Dividiamo il testo riga per riga.
+ * 3. Ogni riga VUOTA viene sostituita con uno spazio unificatore (\u00A0): questo
+ *    perché Markdown considera "vuota" (e quindi la comprime) qualunque riga fatta
+ *    di soli spazi normali o niente — ma NON una riga che contiene questo carattere
+ *    speciale, che quindi sopravvive come riga a sé stante.
+ * 4. Riuniamo tutte le righe con un hard break Markdown esplicito (due spazi + \n)
+ *    tra l'una e l'altra, così ogni riga (vuota o no) genera un vero ritorno a capo
+ *    visibile, nell'ordine e nella quantità esatta in cui l'utente li ha scritti.
  */
 export function preserveLineBreaks(text: string | null | undefined): string {
   if (!text) return '';
   const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
   return normalized
-    .split(/\n{2,}/) // separa i paragrafi già separati da una riga vuota
-    .map((paragraph) => paragraph.replace(/\n/g, '  \n')) // a capo singoli → hard break
-    .join('\n\n'); // riunisce i paragrafi lasciando la riga vuota intatta tra loro
+    .split('\n')
+    .map((line) => (line.trim() === '' ? '\u00A0' : line))
+    .join('  \n');
 }
+

@@ -5,6 +5,7 @@ const TYPE_OPTIONS: { slug: string; label: string; hint: string }[] = [
   { slug: 'arma_primaria', label: 'Arma primaria', hint: 'Exilus, Arcane' },
   { slug: 'arma_secondaria', label: 'Arma secondaria', hint: 'Exilus, Arcane' },
   { slug: 'arma_melee', label: 'Arma melee', hint: 'Exilus, Arcane, Stile' },
+  { slug: 'arma_exalted', label: 'Arma Exalted', hint: 'Exilus, Arcane' },
   { slug: 'companion', label: 'Companion', hint: 'Solo mod base' },
   { slug: 'arma_companion', label: 'Arma del companion', hint: 'Solo mod base' },
   { slug: 'archgun', label: 'Archgun', hint: 'Solo mod base' },

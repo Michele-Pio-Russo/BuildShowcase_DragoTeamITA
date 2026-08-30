@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import type { Profile } from '@/lib/types';
 
 // Disattiva la cache dei dati di Next.js per tutte le pagine di questa
@@ -73,7 +74,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-base-950 flex">
       <Sidebar profile={profile} />
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 pb-20 md:pb-0">{children}</main>
+        <main className="flex-1 pb-20 md:pb-0">
+          <Breadcrumbs />
+          {children}
+        </main>
       </div>
       <MobileNav profile={profile} />
     </div>

@@ -2,15 +2,17 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { Loadout, LoadoutWeapon, Profile, WeaponSlot } from '@/lib/types';
+import { preserveLineBreaks } from '@/lib/markdown';
+import MarkdownText from '@/components/ui/MarkdownText';
 import FavoriteButton from '@/components/build/FavoriteButton';
 import CommentSection from '@/components/comments/CommentSection';
 import DeleteLoadoutButton from '@/components/loadout/DeleteLoadoutButton';
-import MarkdownText from '@/components/ui/MarkdownText';
 
 const slotLabels: Record<WeaponSlot, string> = {
   primaria: 'Arma primaria',
   secondaria: 'Arma secondaria',
   melee: 'Arma melee',
+  exalted: 'Arma Exalted',
 };
 
 export default async function LoadoutDetailPage({ params }: { params: { id: string } }) {
@@ -134,7 +136,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
       </section>
 
       {/* Armi */}
-      {(['primaria', 'secondaria', 'melee'] as WeaponSlot[]).map(
+      {(['primaria', 'secondaria', 'melee', 'exalted'] as WeaponSlot[]).map(
         (slot) =>
           bySlot(slot).length > 0 && (
             <section key={slot} className="mb-6">

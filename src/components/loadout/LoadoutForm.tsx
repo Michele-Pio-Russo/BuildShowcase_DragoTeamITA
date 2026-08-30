@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { Build, Loadout, LoadoutWeapon, WeaponSlot } from '@/lib/types';
-import BuildPicker from './BuildPicker';
+import { preserveLineBreaks } from '@/lib/markdown';
 import MarkdownText from '@/components/ui/MarkdownText';
+import BuildPicker from './BuildPicker';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 type LinkMode = 'build' | 'testo';
@@ -22,12 +23,14 @@ const slotLabels: Record<WeaponSlot, string> = {
   primaria: 'Arma primaria',
   secondaria: 'Arma secondaria',
   melee: 'Arma melee',
+  exalted: 'Arma Exalted',
 };
 
 const slotCategorySlug: Record<WeaponSlot, string> = {
   primaria: 'arma_primaria',
   secondaria: 'arma_secondaria',
   melee: 'arma_melee',
+  exalted: 'arma_exalted',
 };
 
 const emptyWeapon = (slot: WeaponSlot): WeaponRow => ({
@@ -338,7 +341,7 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
             già presente nell&apos;archivio oppure indicare solo il nome dell&apos;arma.
           </p>
 
-          {(['primaria', 'secondaria', 'melee'] as WeaponSlot[]).map((slot) => (
+          {(['primaria', 'secondaria', 'melee', 'exalted'] as WeaponSlot[]).map((slot) => (
             <div key={slot}>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm text-slate-300">{slotLabels[slot]}</label>

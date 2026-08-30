@@ -108,7 +108,7 @@ export interface BuildHistoryEntry {
   editor?: Profile;
 }
 
-export type WeaponSlot = 'primaria' | 'secondaria' | 'melee';
+export type WeaponSlot = 'primaria' | 'secondaria' | 'melee' | 'exalted';
 
 export interface LoadoutWeapon {
   id: string;
@@ -157,6 +157,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   arma_primaria: 'Arma primaria',
   arma_secondaria: 'Arma secondaria',
   arma_melee: 'Arma melee',
+  arma_exalted: 'Arma Exalted',
   companion: 'Companion',
   arma_companion: 'Arma del companion',
   archgun: 'Archgun',
