@@ -6,12 +6,10 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { Build, Category, Tag } from '@/lib/types';
 import { CATEGORY_LABELS } from '@/lib/types';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { preserveLineBreaks } from '@/lib/markdown';
 import ArchonShardPicker from './ArchonShardPicker';
 import BuildTypePicker from './BuildTypePicker';
 import { getCategoryFieldFlags, getCategoryPlaceholders } from '@/lib/buildFields';
+import MarkdownText from '@/components/ui/MarkdownText';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -625,7 +623,7 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
           <p className="text-sm text-slate-400 mb-4">{itemName || 'Nome oggetto'}</p>
           {description && (
             <div className="prose prose-invert prose-sm max-w-none text-slate-300 mb-3">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{preserveLineBreaks(description)}</ReactMarkdown>
+              <MarkdownText text={description} />
             </div>
           )}
           <div className="flex flex-wrap gap-2 mb-3">

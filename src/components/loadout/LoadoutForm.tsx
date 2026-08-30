@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { Build, Loadout, LoadoutWeapon, WeaponSlot } from '@/lib/types';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { preserveLineBreaks } from '@/lib/markdown';
 import BuildPicker from './BuildPicker';
+import MarkdownText from '@/components/ui/MarkdownText';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 type LinkMode = 'build' | 'testo';
@@ -478,7 +476,7 @@ export default function LoadoutForm({ existingLoadout }: { existingLoadout?: Loa
             </ul>
             {notes && (
               <div className="prose prose-invert prose-sm max-w-none text-slate-300 mt-3">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{preserveLineBreaks(notes)}</ReactMarkdown>
+                <MarkdownText text={notes} />
               </div>
             )}
           </div>

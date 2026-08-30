@@ -7,9 +7,7 @@ import FavoriteButton from '@/components/build/FavoriteButton';
 import DuplicateButton from '@/components/build/DuplicateButton';
 import DeleteBuildButton from '@/components/build/DeleteBuildButton';
 import CommentSection from '@/components/comments/CommentSection';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { preserveLineBreaks } from '@/lib/markdown';
+import MarkdownText from '@/components/ui/MarkdownText';
 
 export default async function BuildDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -146,7 +144,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         <section className="mb-6">
           <h2 className="text-lg font-medium text-slate-100 mb-2">Descrizione</h2>
           <div className="prose prose-invert prose-sm max-w-none text-slate-300">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{preserveLineBreaks(build.description_md)}</ReactMarkdown>
+            <MarkdownText text={build.description_md} />
           </div>
         </section>
       )}
@@ -155,7 +153,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         <section className="mb-6">
           <h2 className="text-lg font-medium text-slate-100 mb-2">Stile di gioco e casi d&apos;uso</h2>
           <div className="prose prose-invert prose-sm max-w-none text-slate-300">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{preserveLineBreaks(build.playstyle_md)}</ReactMarkdown>
+            <MarkdownText text={build.playstyle_md} />
           </div>
         </section>
       )}
