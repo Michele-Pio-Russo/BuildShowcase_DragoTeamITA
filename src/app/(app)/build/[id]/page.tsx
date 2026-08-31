@@ -7,6 +7,7 @@ import FavoriteButton from '@/components/build/FavoriteButton';
 import DuplicateButton from '@/components/build/DuplicateButton';
 import DeleteBuildButton from '@/components/build/DeleteBuildButton';
 import CommentSection from '@/components/comments/CommentSection';
+import { preserveLineBreaks } from '@/lib/markdown';
 import MarkdownText from '@/components/ui/MarkdownText';
 
 export default async function BuildDetailPage({ params }: { params: { id: string } }) {
@@ -73,8 +74,11 @@ export default async function BuildDetailPage({ params }: { params: { id: string
   return (
     <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-8">
       <div className="mb-4">
-        <Link href="/build" className="text-sm text-slate-400 hover:text-slate-200">
-          ← Torna alle build
+        <Link
+          href={build.category?.slug ? `/categoria/${build.category.slug}` : '/build'}
+          className="text-sm text-slate-400 hover:text-slate-200"
+        >
+          ← Torna a {CATEGORY_LABELS[build.category?.slug ?? ''] ?? 'tutte le build'}
         </Link>
       </div>
 
