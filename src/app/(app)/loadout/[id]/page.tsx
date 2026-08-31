@@ -106,7 +106,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
         <h2 className="text-lg font-medium text-slate-100 mb-2">Warframe</h2>
         {loadout.warframe_build ? (
           <Link
-            href={`/build/${loadout.warframe_build.id}`}
+            href={`/build/${loadout.warframe_build.id}?fromLoadout=${loadout.id}`}
             className="card px-4 py-3 flex items-center justify-between hover:border-accent-500/40 transition-colors"
           >
             <div>
@@ -146,7 +146,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
                   w.build ? (
                     <Link
                       key={w.id}
-                      href={`/build/${w.build.id}`}
+                      href={`/build/${w.build.id}?fromLoadout=${loadout.id}`}
                       className="card px-4 py-3 flex items-center justify-between hover:border-accent-500/40 transition-colors"
                     >
                       <div>
@@ -172,7 +172,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
           <h2 className="text-lg font-medium text-slate-100 mb-2">Companion</h2>
           {loadout.companion_build ? (
             <Link
-              href={`/build/${loadout.companion_build.id}`}
+              href={`/build/${loadout.companion_build.id}?fromLoadout=${loadout.id}`}
               className="card px-4 py-3 flex items-center justify-between hover:border-accent-500/40 transition-colors"
             >
               <div>
@@ -192,7 +192,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
               <p className="text-xs text-slate-500 mb-1">Arma del companion</p>
               {loadout.companion_weapon_build ? (
                 <Link
-                  href={`/build/${loadout.companion_weapon_build.id}`}
+                  href={`/build/${loadout.companion_weapon_build.id}?fromLoadout=${loadout.id}`}
                   className="card px-4 py-3 flex items-center justify-between hover:border-accent-500/40 transition-colors"
                 >
                   <div>

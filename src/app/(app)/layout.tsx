@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
@@ -75,7 +76,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar profile={profile} />
       <div className="flex-1 flex flex-col min-w-0">
         <main className="flex-1 pb-20 md:pb-0">
-          <Breadcrumbs />
+          <Suspense fallback={null}>
+            <Breadcrumbs />
+          </Suspense>
           {children}
         </main>
       </div>

@@ -2,13 +2,14 @@ import Link from 'next/link';
 import type { Build } from '@/lib/types';
 import { CATEGORY_LABELS } from '@/lib/types';
 
-export default function BuildCard({ build }: { build: Build }) {
+export default function BuildCard({ build, fromCategory }: { build: Build; fromCategory?: string }) {
   const categorySlug = build.category?.slug ?? '';
   const categoryLabel = CATEGORY_LABELS[categorySlug] ?? build.category?.label ?? '';
+  const href = fromCategory ? `/build/${build.id}?fromCategory=${fromCategory}` : `/build/${build.id}`;
 
   return (
     <Link
-      href={`/build/${build.id}`}
+      href={href}
       className="card overflow-hidden hover:border-accent-500/40 transition-colors group flex flex-col"
     >
       <div className="aspect-video bg-base-900 relative overflow-hidden">
