@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 type Target = 'build' | 'loadout';
@@ -17,11 +18,11 @@ export default function FavoriteButton({
   savesCount: number;
 }) {
   const supabase = createClient();
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [count, setCount] = useState(savesCount);
   const [loading, setLoading] = useState(false);
 
-  const table = targetType === 'build' ? 'builds' : 'loadouts';
   const column = targetType === 'build' ? 'build_id' : 'loadout_id';
 
   async function toggle() {
@@ -34,20 +35,25 @@ export default function FavoriteButton({
       return;
     }
 
+    // Il conteggio (saves_count su builds/loadouts) è gestito da un trigger sul
+    // database quando questa riga viene inserita/eliminata — non lo aggiorniamo
+    // più da qui, perché per un membro normale un update diretto sulla tabella
+    // builds/loadouts verrebbe bloccato in silenzio dalla RLS.
     if (isFavorite) {
       await supabase.from('favorites').delete().eq('user_id', user.id).eq(column, targetId);
-      await supabase
-        .from(table)
-        .update({ saves_count: Math.max(0, count - 1) })
-        .eq('id', targetId);
       setCount((c) => Math.max(0, c - 1));
       setIsFavorite(false);
     } else {
       await supabase.from('favorites').insert({ user_id: user.id, [column]: targetId });
-      await supabase.from(table).update({ saves_count: count + 1 }).eq('id', targetId);
       setCount((c) => c + 1);
       setIsFavorite(true);
     }
+
+    // Invalida la cache di navigazione lato client, così se dopo vai sulla
+    // pagina "Preferiti" vedi subito questa build/loadout, senza dover
+    // ricaricare manualmente il sito.
+    router.refresh();
+
     setLoading(false);
   }
 
