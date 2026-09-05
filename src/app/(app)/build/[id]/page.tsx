@@ -168,13 +168,13 @@ export default async function BuildDetailPage({ params }: { params: { id: string
           <div className="space-y-4">
             {(modImages as BuildModImage[]).map((mi) => (
               <div key={mi.id}>
+                {mi.caption && <p className="text-sm text-slate-400 mb-1.5">{mi.caption}</p>}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={mi.image_url}
                   alt={mi.caption ?? 'Configurazione mod'}
                   className="w-full max-h-[32rem] object-contain rounded-xl border border-base-600 bg-base-900"
                 />
-                {mi.caption && <p className="text-sm text-slate-400 mt-1.5">{mi.caption}</p>}
               </div>
             ))}
           </div>
