@@ -55,7 +55,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
     ]);
 
   // conteggio visualizzazioni (fire and forget)
-  supabase.from('builds').update({ views_count: build.views_count + 1 }).eq('id', build.id).then();
+  supabase.rpc('increment_views', { p_build_id: build.id }).then();
 
   const tags = (buildTags?.map((t: any) => t.tag).filter(Boolean) ?? []) as Tag[];
 
