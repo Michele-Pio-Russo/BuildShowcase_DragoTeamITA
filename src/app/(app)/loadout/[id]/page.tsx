@@ -75,7 +75,7 @@ export default async function LoadoutDetailPage({ params }: { params: { id: stri
         <img
           src={loadout.image_url}
           alt={loadout.title}
-          className="w-full max-h-96 object-contain rounded-xl border border-base-600 bg-base-900 mb-5"
+          className="block mx-auto max-w-full max-h-96 w-auto h-auto rounded-xl border border-base-600 mb-5"
         />
       )}
 

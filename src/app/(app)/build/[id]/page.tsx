@@ -87,7 +87,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
         <img
           src={build.image_url}
           alt={build.title}
-          className="w-full max-h-96 object-contain rounded-xl border border-base-600 bg-base-900 mb-5"
+          className="block mx-auto max-w-full max-h-96 w-auto h-auto rounded-xl border border-base-600 mb-5"
         />
       )}
 
@@ -167,13 +167,13 @@ export default async function BuildDetailPage({ params }: { params: { id: string
           <h2 className="text-lg font-medium text-slate-100 mb-2">Configurazione mod</h2>
           <div className="space-y-4">
             {(modImages as BuildModImage[]).map((mi) => (
-              <div key={mi.id}>
+              <div key={mi.id} className="w-fit max-w-full mx-auto">
                 {mi.caption && <p className="text-sm text-slate-400 mb-1.5">{mi.caption}</p>}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={mi.image_url}
                   alt={mi.caption ?? 'Configurazione mod'}
-                  className="w-full max-h-[32rem] object-contain rounded-xl border border-base-600 bg-base-900"
+                  className="block max-w-full max-h-[32rem] w-auto h-auto rounded-xl border border-base-600"
                 />
               </div>
             ))}
@@ -186,7 +186,7 @@ export default async function BuildDetailPage({ params }: { params: { id: string
           <img
             src={build.mods_image_url}
             alt="Configurazione mod"
-            className="w-full max-h-[32rem] object-contain rounded-xl border border-base-600 bg-base-900"
+            className="block mx-auto max-w-full max-h-[32rem] w-auto h-auto rounded-xl border border-base-600"
           />
         </section>
       ) : (
