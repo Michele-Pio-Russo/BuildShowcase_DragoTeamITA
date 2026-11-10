@@ -30,6 +30,7 @@ export default function DuplicateButton({ build, mods }: { build: Build; mods: B
         playstyle_md: build.playstyle_md,
         forma: build.forma,
         stile: build.stile,
+        ...(build.railjack ? { railjack: build.railjack } : {}),
         reattore: build.reattore,
         aura: build.aura,
         exilus: build.exilus,

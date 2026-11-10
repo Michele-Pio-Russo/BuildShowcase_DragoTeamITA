@@ -9,6 +9,7 @@ import DeleteBuildButton from '@/components/build/DeleteBuildButton';
 import CommentSection from '@/components/comments/CommentSection';
 import { preserveLineBreaks } from '@/lib/markdown';
 import MarkdownText from '@/components/ui/MarkdownText';
+import RailjackSection from '@/components/build/RailjackSection';
 
 export default async function BuildDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -161,6 +162,8 @@ export default async function BuildDetailPage({ params }: { params: { id: string
           </div>
         </section>
       )}
+
+      <RailjackSection data={build.railjack} />
 
       {modImages && modImages.length > 0 ? (
         <section className="mb-6">

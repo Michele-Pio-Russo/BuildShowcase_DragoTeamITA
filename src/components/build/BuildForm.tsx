@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import type { Build, Category, Tag } from '@/lib/types';
+import type { Build, Category, RailjackData, Tag } from '@/lib/types';
 import { CATEGORY_LABELS } from '@/lib/types';
+import MarkdownText from '@/components/ui/MarkdownText';
+import RailjackFields from './RailjackFields';
+import { cleanRailjackData } from '@/lib/railjack';
 import ArchonShardPicker from './ArchonShardPicker';
 import BuildTypePicker from './BuildTypePicker';
 import { getCategoryFieldFlags, getCategoryPlaceholders } from '@/lib/buildFields';
-import MarkdownText from '@/components/ui/MarkdownText';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -51,6 +53,7 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
   const [arcane, setArcane] = useState(existingBuild?.arcane ?? '');
   const [focusSchool, setFocusSchool] = useState(existingBuild?.focus_school ?? '');
   const [archonShards, setArchonShards] = useState(existingBuild?.archon_shards ?? '');
+  const [railjack, setRailjack] = useState<RailjackData>(existingBuild?.railjack ?? {});
 
   // Step 3
   const [description, setDescription] = useState(existingBuild?.description_md ?? '');
@@ -227,6 +230,11 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
       arcane: arcane || null,
       focus_school: focusSchool || null,
       archon_shards: archonShards || null,
+      ...(fieldFlags.showRailjack
+        ? { railjack: cleanRailjackData(railjack) }
+        : existingBuild?.railjack
+          ? { railjack: null }
+          : {}),
     };
 
     let buildId = existingBuild?.id;
@@ -549,6 +557,12 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
               <ArchonShardPicker value={archonShards} onChange={setArchonShards} />
             </div>
           )}
+
+          {fieldFlags.showRailjack && (
+            <div className="pt-2 border-t border-base-700">
+              <RailjackFields value={railjack} onChange={setRailjack} />
+            </div>
+          )}
         </div>
       )}
 
@@ -638,6 +652,17 @@ export default function BuildForm({ existingBuild }: { existingBuild?: Build }) 
               ? `${modImages.length} screenshot configurazione mod allegati`
               : 'Nessuno screenshot mod caricato'}
           </p>
+          {fieldFlags.showRailjack && (
+            <p className="text-xs text-slate-500 mt-1">
+              {(() => {
+                const d = cleanRailjackData(railjack);
+                const nComponents = Object.keys(d?.components ?? {}).length;
+                const nArmaments = Object.keys(d?.armaments ?? {}).length;
+                const nCrew = d?.crew?.length ?? 0;
+                return `Componenti: ${nComponents}/4 · Artiglieria: ${nArmaments}/3 · Equipaggio: ${nCrew}`;
+              })()}
+            </p>
+          )}
         </div>
       )}
 

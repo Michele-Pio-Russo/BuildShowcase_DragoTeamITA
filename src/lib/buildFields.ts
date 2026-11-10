@@ -5,6 +5,7 @@ export interface CategoryFieldFlags {
   showFocusSchool: boolean;
   showArchonShards: boolean;
   showStile: boolean;
+  showRailjack: boolean;
 }
 
 /**
@@ -18,20 +19,25 @@ export interface CategoryFieldFlags {
  *   Archon/Stile (le Exalted melee usano lo stance dell'arma melee equipaggiata, non uno slot proprio).
  * - Companion e armi companion: solo gli slot mod base (Precept per il companion) — niente Aura/Exilus/Arcane/Focus/Archon/Stile
  * - Archgun, Archmelee e Archwing: solo gli 8 slot mod base, nessuno slot speciale (confermato dalla wiki ufficiale)
+ * - Necramech: 12 slot mod generici, nessuno slot speciale. K-Drive: 8 slot generici, nessuno slot speciale.
+ * - Railjack: il Plexus (la sua "configurazione mod") ha 8 slot, uno slot Aura e le sezioni Battle e Tactical;
+ *   in più il Railjack ha componenti, artiglieria ed equipaggio (blocco dedicato, showRailjack).
  */
 export function getCategoryFieldFlags(slug: string | undefined): CategoryFieldFlags {
   const isWarframe = slug === 'warframe';
   const isMelee = slug === 'arma_melee';
   const isExalted = slug === 'arma_exalted';
+  const isRailjack = slug === 'railjack';
   const isWeapon = slug === 'arma_primaria' || slug === 'arma_secondaria' || slug === 'arma_melee';
 
   return {
-    showAura: isWarframe,
+    showAura: isWarframe || isRailjack,
     showExilus: isWarframe || isWeapon || isExalted,
     showArcane: isWarframe || isWeapon || isExalted,
     showFocusSchool: isWarframe,
     showArchonShards: isWarframe,
     showStile: isMelee,
+    showRailjack: isRailjack,
   };
 }
 
@@ -63,6 +69,12 @@ export function getCategoryPlaceholders(slug: string | undefined): CategoryPlace
       return { title: 'es. Prisma Veritux Archwing Build', itemName: 'es. Prisma Veritux' };
     case 'archwing':
       return { title: 'es. Itzal Rush Build', itemName: 'es. Itzal' };
+    case 'necramech':
+      return { title: 'es. Voidrig Tank Build', itemName: 'es. Voidrig' };
+    case 'k_drive':
+      return { title: 'es. K-Drive Standing Grinding', itemName: 'es. K-Drive Runway' };
+    case 'railjack':
+      return { title: 'es. Railjack Steel Path Solo', itemName: 'es. Railjack' };
     default:
       return { title: 'es. Titolo della build', itemName: 'es. Nome oggetto' };
   }

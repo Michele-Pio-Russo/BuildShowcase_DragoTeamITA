@@ -11,6 +11,9 @@ const TYPE_OPTIONS: { slug: string; label: string; hint: string }[] = [
   { slug: 'archgun', label: 'Archgun', hint: 'Solo mod base' },
   { slug: 'archmelee', label: 'Archmelee', hint: 'Solo mod base' },
   { slug: 'archwing', label: 'Archwing', hint: 'Solo mod base' },
+  { slug: 'necramech', label: 'Necramech', hint: 'Solo mod base' },
+  { slug: 'k_drive', label: 'K-Drive', hint: 'Solo mod base' },
+  { slug: 'railjack', label: 'Railjack', hint: 'Aura, componenti, artiglieria, equipaggio' },
 ];
 
 export default function BuildTypePicker({ onChoose }: { onChoose: (slug: string) => void }) {

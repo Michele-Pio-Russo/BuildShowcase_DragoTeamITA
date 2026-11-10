@@ -54,6 +54,23 @@ export interface BuildStats {
   [key: string]: string | undefined;
 }
 
+// ---------- Railjack: dati strutturati oltre alla configurazione mod (Plexus) ----------
+export type RailjackCrewRole = 'pilota' | 'gunner' | 'ingegnere' | 'difensore';
+
+export interface RailjackCrewMember {
+  role: RailjackCrewRole;
+  name?: string;
+  note?: string;
+}
+
+export interface RailjackData {
+  /** Le 4 categorie di componenti della nave */
+  components?: { shield_array?: string; engines?: string; plating?: string; reactor?: string };
+  /** I 3 slot di artiglieria: arma del pilota (Nose Turret), torrette di bordo (Swivel), Ordnance */
+  armaments?: { pilota?: string; torrette?: string; ordnance?: string };
+  crew?: RailjackCrewMember[];
+}
+
 export interface Build {
   id: string;
   title: string;
@@ -74,6 +91,7 @@ export interface Build {
   focus_school: string | null;
   archon_shards: string | null;
   mods_image_url: string | null;
+  railjack: RailjackData | null;
   stats: BuildStats;
   views_count: number;
   saves_count: number;
@@ -163,4 +181,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   archgun: 'Archgun',
   archmelee: 'Archmelee',
   archwing: 'Archwing',
+  necramech: 'Necramech',
+  k_drive: 'K-Drive',
+  railjack: 'Railjack',
 };
