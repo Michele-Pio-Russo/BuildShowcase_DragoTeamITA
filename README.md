@@ -7,8 +7,6 @@ Built for the Drago Team ITA community.
 **Live demo:** <link Vercel>  
 **Italian version:** [README.it.md](README.it.md)
 
-![Screenshot](docs/screenshot-home.png)
-
 ## Why it exists
 Clan members kept sharing builds through chat messages that were
 impossible to search and quickly got buried. This app gives the
